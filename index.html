@@ -15,8 +15,23 @@
             align-items: center;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Biar pas tombol Tidak membesar, layar gak muncul scroll */
+            overflow: hidden; 
             text-align: center;
+        }
+
+        /* Styling buat Skor */
+        #score-board {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #ff4d94;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 100;
         }
 
         #quiz-container {
@@ -32,7 +47,7 @@
 
         h1 {
             color: #ff4d94;
-            font-size: clamp(20px, 5vw, 28px); /* Responsif menyesuaikan layar */
+            font-size: clamp(20px, 5vw, 28px); 
             margin-bottom: 30px;
         }
 
@@ -50,119 +65,202 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.3s ease; /* Transisi membesar */
+            transition: transform 0.3s ease, background-color 0.3s ease; 
         }
 
         #btn-ya {
             background-color: #ffb3d1;
             color: white;
-            z-index: 9999; /* Biar selalu di atas pas lari-lari */
-            transition: left 0.2s ease, top 0.2s ease; /* Biar gesernya mulus */
+            position: relative;
+            z-index: 50;
+            transform-origin: center;
         }
+
+        #btn-ya:hover { background-color: #ff80b3; }
 
         #btn-tidak {
             background-color: #99ccff;
             color: white;
-            z-index: 50;
             position: relative;
-            transform-origin: center; /* Membesar dari tengah */
+            z-index: 50;
+            transform-origin: center;
         }
+
+        #btn-tidak:hover { background-color: #66b3ff; }
 
         #result {
             display: none;
-            font-size: clamp(24px, 6vw, 32px);
-            color: #ff4d94;
-            font-weight: bold;
-            padding: 20px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 85%;
+            max-width: 500px;
             z-index: 10000;
         }
+
+        #result p {
+            font-size: clamp(20px, 5vw, 28px);
+            color: #ff4d94;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #btn-lanjut {
+            background-color: #ff4d94;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            width: 100%;
+        }
+        #btn-lanjut:hover { background-color: #e6005c; }
+
     </style>
 </head>
 <body>
 
+    <div id="score-board">Skor: <span id="score">0</span></div>
+
     <div id="quiz-container">
         <h1 id="question">Pertanyaan 1</h1>
         <div class="btn-container">
-            <button id="btn-ya" onclick="nextQuestion('ya')">Ya</button>
-            <button id="btn-tidak" onclick="nextQuestion('tidak')">Tidak</button>
+            <button id="btn-ya" onclick="answer('ya')">Ya</button>
+            <button id="btn-tidak" onclick="answer('tidak')">Tidak</button>
         </div>
     </div>
 
     <div id="result">
-        Hehehe bener banget! Aynna gak cabi kok, tapi imuttt! 💖✨
+        <p id="result-text"></p>
+        <button id="btn-lanjut" onclick="lanjutQuiz()">Lanjut Quiz (Ya)</button>
     </div>
 
     <script>
         const questions = [
             "Apakah kamu suka jalan-jalan?",
             "Apakah es krim rasanya manis?",
-            "Apakah aynna cabiii?"
+            "Apakah aynna cabiii?",
+            "Apakah bumi itu bulat?",
+            "Apakah air laut itu asin?",
+            "Akuu jemputt kamuu teruss yaaa"
         ];
 
         let currentQuestionIndex = 0;
-        let scaleTidak = 1; 
+        let score = 0;
+        let scaleMembesar = 1; 
 
         const questionEl = document.getElementById("question");
         const btnYa = document.getElementById("btn-ya");
         const btnTidak = document.getElementById("btn-tidak");
         const quizContainer = document.getElementById("quiz-container");
         const resultEl = document.getElementById("result");
+        const resultText = document.getElementById("result-text");
+        const btnLanjut = document.getElementById("btn-lanjut");
+        const scoreEl = document.getElementById("score");
 
         // Tampilkan pertanyaan pertama
         questionEl.innerText = questions[currentQuestionIndex];
 
-        function nextQuestion(answer) {
-            // Kalau sudah di pertanyaan "Apakah Aynna cabiii?" dan jawab "Tidak"
+        function answer(pilihan) {
+            // Tambah skor tiap jawab
+            score += 20;
+            scoreEl.innerText = score;
+
+            // Logika Pertanyaan 3 (Apakah aynna cabiii?)
             if (currentQuestionIndex === 2) {
-                if (answer === 'tidak') {
+                if (pilihan === 'tidak') {
                     quizContainer.style.display = "none";
-                    btnYa.style.display = "none"; // Hilangkan tombol Ya juga
                     resultEl.style.display = "block";
+                    resultText.innerText = "Hehehe bener banget! Aynna gak cabi kok, tapi imuttt! 💖✨";
+                    btnLanjut.style.display = "inline-block";
                 }
                 return; 
             }
 
-            // Lanjut pertanyaan
+            // Logika Pertanyaan 6 (Akuu jemputt kamuu teruss yaaa)
+            if (currentQuestionIndex === 5) {
+                if (pilihan === 'ya') {
+                    quizContainer.style.display = "none";
+                    resultEl.style.display = "block";
+                    resultText.innerText = "Asiikkk! Tungguin aku jemput terus yaa cintaa! 🚗💨💖";
+                    btnLanjut.style.display = "none"; // Hilangkan tombol lanjut karena kuis selesai
+                }
+                return;
+            }
+
+            // Lanjut pertanyaan biasa
             currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function lanjutQuiz() {
+            // Sembunyikan result, tampilkan kuis lagi
+            resultEl.style.display = "none";
+            quizContainer.style.display = "block";
+            
+            // Reset efek jebakan sebelumnya
+            resetTrick();
+
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function showQuestion() {
             questionEl.innerText = questions[currentQuestionIndex];
 
-            // Setup jebakan di pertanyaan ke-3
+            // Setup jebakan di pertanyaan ke-3 (YA kabur, TIDAK membesar)
             if (currentQuestionIndex === 2) {
-                setupTrick();
+                setupTrick(btnYa, btnTidak);
+            }
+
+            // Setup jebakan di pertanyaan ke-6 (TIDAK kabur, YA membesar)
+            if (currentQuestionIndex === 5) {
+                setupTrick(btnTidak, btnYa);
             }
         }
 
-        function setupTrick() {
-            // Ubah posisi jadi fixed biar bisa pindah se-layar tanpa mengubah layout container
-            btnYa.style.position = "fixed";
+        // Fungsi umum buat jebakan (bisa ditukar tombolnya)
+        function setupTrick(btnKabur, btnMembesar) {
+            scaleMembesar = 1; // Reset skala
             
-            // Setel posisi awal sesuai posisinya saat ini biar gak kaget lompat dulu
-            const rect = btnYa.getBoundingClientRect();
-            btnYa.style.left = rect.left + "px";
-            btnYa.style.top = rect.top + "px";
+            // Jadikan tombol kabur bebas bergerak
+            btnKabur.style.position = "fixed";
+            btnKabur.style.zIndex = "9999";
+            
+            const rect = btnKabur.getBoundingClientRect();
+            btnKabur.style.left = rect.left + "px";
+            btnKabur.style.top = rect.top + "px";
 
-            // Event listener untuk kabur (berlaku di laptop dan HP)
-            btnYa.addEventListener("mouseover", runawayBtn);
-            btnYa.addEventListener("touchstart", runawayBtn, {passive: false});
+            // Tambah event listener (Pakai fungsi wrapper biar gampang dihapus nanti)
+            btnKabur.onmouseover = function(e) { runaway(e, btnKabur, btnMembesar); };
+            btnKabur.ontouchstart = function(e) { runaway(e, btnKabur, btnMembesar); };
         }
 
-        function runawayBtn(e) {
+        function runaway(e, btnKabur, btnMembesar) {
             if(e.type === 'touchstart') e.preventDefault(); 
 
-            // Hitung ruang aman agar tombol tidak keluar layar
-            const safeWidth = window.innerWidth - btnYa.offsetWidth - 20;
-            const safeHeight = window.innerHeight - btnYa.offsetHeight - 20;
+            const safeWidth = window.innerWidth - btnKabur.offsetWidth - 20;
+            const safeHeight = window.innerHeight - btnKabur.offsetHeight - 20;
 
-            // Generate posisi X dan Y secara acak
             const randomX = Math.max(10, Math.floor(Math.random() * safeWidth));
             const randomY = Math.max(10, Math.floor(Math.random() * safeHeight));
 
-            btnYa.style.left = randomX + "px";
-            btnYa.style.top = randomY + "px";
+            btnKabur.style.left = randomX + "px";
+            btnKabur.style.top = randomY + "px";
 
-            // Bikin tombol Tidak makin raksasa
-            scaleTidak += 0.8; // Ukurannya nambah lebih drastis biar cepat penuh
-            btnTidak.style.transform = `scale(${scaleTidak})`;
+            // Bikin tombol yang satu lagi membesar
+            scaleMembesar += 0.8; 
+            btnMembesar.style.transform = `scale(${scaleMembesar})`;
+            btnMembesar.style.zIndex = "5000"; // Biar nutupin elemen lain
+        }
+
+        function resetTrick() {
+            // Bersihkan semua style inline dan event listener dari kedua tombol
+            btnYa.style = "";
+            btnTidak.style = "";
+            btnYa.onmouseover = null;
+            btnYa.ontouchstart = null;
+            btnTidak.onmouseover = null;
+            btnTidak.ontouchstart = null;
         }
     </script>
 
