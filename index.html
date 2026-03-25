@@ -2,82 +2,79 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kuis Spesial buat Aynna</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #ffe6f2; /* Warna pink pastel */
+            background-color: #ffe6f2; 
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
+            width: 100vw;
+            overflow: hidden; /* Biar pas tombol Tidak membesar, layar gak muncul scroll */
             text-align: center;
         }
 
         #quiz-container {
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 90%;
+            width: 85%;
+            max-width: 500px;
             z-index: 10;
             position: relative;
         }
 
         h1 {
             color: #ff4d94;
-            font-size: 28px;
+            font-size: clamp(20px, 5vw, 28px); /* Responsif menyesuaikan layar */
             margin-bottom: 30px;
         }
 
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            position: relative;
-            min-height: 60px;
+            gap: 15px;
+            align-items: center;
         }
 
         button {
-            padding: 15px 40px;
-            font-size: 18px;
+            padding: 12px 30px;
+            font-size: clamp(16px, 4vw, 18px);
             font-weight: bold;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: transform 0.3s ease; /* Transisi membesar */
         }
 
         #btn-ya {
             background-color: #ffb3d1;
             color: white;
-        }
-
-        #btn-ya:hover {
-            background-color: #ff80b3;
+            z-index: 9999; /* Biar selalu di atas pas lari-lari */
+            transition: left 0.2s ease, top 0.2s ease; /* Biar gesernya mulus */
         }
 
         #btn-tidak {
             background-color: #99ccff;
             color: white;
-            transition: all 0.3s ease; /* Bikin animasi membesarnya mulus */
-            z-index: 5;
-        }
-
-        #btn-tidak:hover {
-            background-color: #66b3ff;
+            z-index: 50;
+            position: relative;
+            transform-origin: center; /* Membesar dari tengah */
         }
 
         #result {
             display: none;
-            font-size: 32px;
+            font-size: clamp(24px, 6vw, 32px);
             color: #ff4d94;
             font-weight: bold;
+            padding: 20px;
+            z-index: 10000;
         }
     </style>
 </head>
@@ -96,7 +93,6 @@
     </div>
 
     <script>
-        // Daftar pertanyaan
         const questions = [
             "Apakah kamu suka jalan-jalan?",
             "Apakah es krim rasanya manis?",
@@ -104,7 +100,7 @@
         ];
 
         let currentQuestionIndex = 0;
-        let scaleTidak = 1; // Ukuran awal tombol tidak
+        let scaleTidak = 1; 
 
         const questionEl = document.getElementById("question");
         const btnYa = document.getElementById("btn-ya");
@@ -116,57 +112,56 @@
         questionEl.innerText = questions[currentQuestionIndex];
 
         function nextQuestion(answer) {
-            // Kalau udah di pertanyaan terakhir dan dia jawab "tidak"
+            // Kalau sudah di pertanyaan "Apakah Aynna cabiii?" dan jawab "Tidak"
             if (currentQuestionIndex === 2) {
                 if (answer === 'tidak') {
                     quizContainer.style.display = "none";
+                    btnYa.style.display = "none"; // Hilangkan tombol Ya juga
                     resultEl.style.display = "block";
                 }
-                return; // Stop di sini
+                return; 
             }
 
-            // Lanjut ke pertanyaan berikutnya
+            // Lanjut pertanyaan
             currentQuestionIndex++;
             questionEl.innerText = questions[currentQuestionIndex];
 
-            // Kalau masuk ke pertanyaan ke-3 (index 2)
+            // Setup jebakan di pertanyaan ke-3
             if (currentQuestionIndex === 2) {
                 setupTrick();
             }
         }
 
         function setupTrick() {
-            // Ubah tombol Ya jadi absolute biar bisa lari-lari
-            btnYa.style.position = "absolute";
+            // Ubah posisi jadi fixed biar bisa pindah se-layar tanpa mengubah layout container
+            btnYa.style.position = "fixed";
             
-            // Tambahkan event listener pas mouse ngedeket ke tombol Ya
+            // Setel posisi awal sesuai posisinya saat ini biar gak kaget lompat dulu
+            const rect = btnYa.getBoundingClientRect();
+            btnYa.style.left = rect.left + "px";
+            btnYa.style.top = rect.top + "px";
+
+            // Event listener untuk kabur (berlaku di laptop dan HP)
             btnYa.addEventListener("mouseover", runawayBtn);
-            // Buat jaga-jaga kalau dia pakai HP (touchscreen)
-            btnYa.addEventListener("touchstart", runawayBtn);
+            btnYa.addEventListener("touchstart", runawayBtn, {passive: false});
         }
 
         function runawayBtn(e) {
-            // Biar ga kepencet beneran kalau di HP
-            e.preventDefault(); 
+            if(e.type === 'touchstart') e.preventDefault(); 
 
-            // Hitung posisi random untuk tombol Ya
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-            const btnWidth = btnYa.offsetWidth;
-            const btnHeight = btnYa.offsetHeight;
+            // Hitung ruang aman agar tombol tidak keluar layar
+            const safeWidth = window.innerWidth - btnYa.offsetWidth - 20;
+            const safeHeight = window.innerHeight - btnYa.offsetHeight - 20;
 
-            // Random posisi (dikurangi ukuran tombol biar ga keluar layar)
-            const randomX = Math.floor(Math.random() * (windowWidth - btnWidth));
-            const randomY = Math.floor(Math.random() * (windowHeight - btnHeight));
+            // Generate posisi X dan Y secara acak
+            const randomX = Math.max(10, Math.floor(Math.random() * safeWidth));
+            const randomY = Math.max(10, Math.floor(Math.random() * safeHeight));
 
-            btnYa.style.left = `${randomX}px`;
-            btnYa.style.top = `${randomY}px`;
-            
-            // Keluarkan tombol dari container biar bebas gerak se-layar
-            document.body.appendChild(btnYa);
+            btnYa.style.left = randomX + "px";
+            btnYa.style.top = randomY + "px";
 
-            // Bikin tombol TIDAK makin besar tiap kali tombol YA di-hover
-            scaleTidak += 0.5; // Tambah ukuran 0.5 kali lipat
+            // Bikin tombol Tidak makin raksasa
+            scaleTidak += 0.8; // Ukurannya nambah lebih drastis biar cepat penuh
             btnTidak.style.transform = `scale(${scaleTidak})`;
         }
     </script>
