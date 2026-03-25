@@ -31,14 +31,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 99999; /* Paling atas nutupin kuis */
+            z-index: 99999; 
             transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
         }
 
         .loading-heart {
             width: 100px;
             height: 100px;
-            /* SVG Heart warna pink muda (kosong) */
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffb3d1"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center;
             background-size: cover;
             position: relative;
@@ -50,10 +49,8 @@
             left: 0;
             width: 100%;
             height: 0%;
-            /* SVG Heart warna pink tua (isi) */
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff4d94"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat bottom left;
             background-size: 100px 100px;
-            /* Animasi ngisi dari bawah ke atas selama 2 detik */
             animation: fillHeartAnim 2s ease-in-out forwards; 
         }
 
@@ -69,7 +66,6 @@
             color: #ff4d94;
             opacity: 0;
             transform: translateY(20px);
-            /* Animasi teks muncul setelah love penuh (delay 2s) */
             animation: revealText 1s ease-out 2s forwards; 
             padding: 0 15px;
         }
@@ -77,7 +73,6 @@
         @keyframes revealText {
             to { opacity: 1; transform: translateY(0); }
         }
-
 
         /* --- STYLING KUIS --- */
         #score-board {
@@ -116,6 +111,7 @@
             justify-content: center;
             gap: 15px;
             align-items: center;
+            min-height: 50px; /* Biar boxnya ga menciut pas tombolnya kabur */
         }
 
         button {
@@ -197,8 +193,6 @@
         // --- LOGIKA LOADING SCREEN ---
         window.addEventListener("load", function() {
             const loadingScreen = document.getElementById("loading-screen");
-            
-            // Tunggu 4.5 detik (2s love ngisi + 1s nama muncul + 1.5s diliat dulu)
             setTimeout(() => {
                 loadingScreen.style.opacity = "0";
                 loadingScreen.style.visibility = "hidden";
@@ -234,7 +228,6 @@
             score += 20;
             scoreEl.innerText = score;
 
-            // Jebakan Q3
             if (currentQuestionIndex === 2) {
                 if (pilihan === 'tidak') {
                     quizContainer.style.display = "none";
@@ -245,7 +238,6 @@
                 return; 
             }
 
-            // Jebakan Q6
             if (currentQuestionIndex === 5) {
                 if (pilihan === 'ya') {
                     quizContainer.style.display = "none";
@@ -271,25 +263,27 @@
         function showQuestion() {
             questionEl.innerText = questions[currentQuestionIndex];
 
+            // Setup jebakan, biarkan rapi dulu di awal
             if (currentQuestionIndex === 2) setupTrick(btnYa, btnTidak);
             if (currentQuestionIndex === 5) setupTrick(btnTidak, btnYa);
         }
 
         function setupTrick(btnKabur, btnMembesar) {
             scaleMembesar = 1; 
-            btnKabur.style.position = "fixed";
-            btnKabur.style.zIndex = "9999";
             
-            const rect = btnKabur.getBoundingClientRect();
-            btnKabur.style.left = rect.left + "px";
-            btnKabur.style.top = rect.top + "px";
-
+            // Pasangnya event listener aja, stylingnya tetep aman
             btnKabur.onmouseover = function(e) { runaway(e, btnKabur, btnMembesar); };
             btnKabur.ontouchstart = function(e) { runaway(e, btnKabur, btnMembesar); };
         }
 
         function runaway(e, btnKabur, btnMembesar) {
             if(e.type === 'touchstart') e.preventDefault(); 
+
+            // Baru diubah jadi fixed pas jari/mouse nyentuh
+            if (btnKabur.style.position !== "fixed") {
+                btnKabur.style.position = "fixed";
+                btnKabur.style.zIndex = "9999";
+            }
 
             const safeWidth = window.innerWidth - btnKabur.offsetWidth - 20;
             const safeHeight = window.innerHeight - btnKabur.offsetHeight - 20;
@@ -300,14 +294,16 @@
             btnKabur.style.left = randomX + "px";
             btnKabur.style.top = randomY + "px";
 
+            // Tombol sebelahnya makin gede
             scaleMembesar += 0.8; 
             btnMembesar.style.transform = `scale(${scaleMembesar})`;
             btnMembesar.style.zIndex = "5000"; 
         }
 
         function resetTrick() {
-            btnYa.style = "";
-            btnTidak.style = "";
+            // Bersihin semua efek ke bentuk semula
+            btnYa.removeAttribute("style");
+            btnTidak.removeAttribute("style");
             btnYa.onmouseover = null;
             btnYa.ontouchstart = null;
             btnTidak.onmouseover = null;
